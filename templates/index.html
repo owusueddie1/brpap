@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BRPAP Forecasting</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="hero">
+    <div class="hero-content">
+      <p class="eyebrow">Premium AI Forecasting</p>
+      <h1>BRPAP</h1>
+      <p>Upload your financial CSVs, manage your data library, and generate cash flow forecasts that feel like a modern forecasting dashboard.</p>
+      <div class="button-row">
+        <a href="/create-checkout-session" class="btn btn-primary">Subscribe for $49/month</a>
+        <button id="refresh-files" class="btn btn-secondary">Refresh library</button>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="stats-card">
+        <h2>Live Forecast</h2>
+        <div id="forecast-output" class="forecast-output">
+          <p>Select a file from the library or upload a new CSV to preview forecasts instantly.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="library-section">
+    <div class="library-header">
+      <div>
+        <h2>Data Library</h2>
+        <p>Search files, upload CSVs, and choose the dataset you want to forecast.</p>
+      </div>
+      <input id="library-search" type="search" placeholder="Search your files" />
+    </div>
+    <div class="upload-panel">
+      <form id="upload-form">
+        <label for="file-upload">Upload CSV dataset</label>
+        <input id="file-upload" type="file" accept=".csv" />
+        <button type="submit" class="btn btn-primary small">Upload file</button>
+        <span id="upload-message" class="upload-message"></span>
+      </form>
+    </div>
+    <div id="file-list" class="file-list"></div>
+  </section>
+
+  <section class="features">
+    <div class="feature">
+      <h3>Forecast from your data</h3>
+      <p>Upload actual cash balance CSVs and keep every dataset in a searchable library.</p>
+    </div>
+    <div class="feature">
+      <h3>AI-powered modeling</h3>
+      <p>Prophet-driven forecasts help you see next month’s cashflow and risk ranges instantly.</p>
+    </div>
+    <div class="feature">
+      <h3>Customer-ready interface</h3>
+      <p>Use the dashboard yourself or share the demo link with prospective customers.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>BRPAP • Business forecasting for modern operators</p>
+  </footer>
+
+  <script>
+    const uploadForm = document.getElementById('upload-form');
+    const fileUpload = document.getElementById('file-upload');
+    const uploadMessage = document.getElementById('upload-message');
+    const fileList = document.getElementById('file-list');
+    const librarySearch = document.getElementById('library-search');
+    const refreshFiles = document.getElementById('refresh-files');
+    const forecastOutput = document.getElementById('forecast-output');
+
+    async function fetchFiles(query = '') {
+      const searchParam = query ? `?search=${encodeURIComponent(query)}` : '';
+      const response = await fetch(`/files${searchParam}`);
+      const data = await response.json();
+      renderFileList(data.files);
+    }
+
+    function renderFileList(files) {
+      if (!files.length) {
+        fileList.innerHTML = '<div class="empty-state">No files found. Upload a CSV to begin.</div>';
+        return;
+      }
+
+      fileList.innerHTML = files.map(file => `
+        <div class="file-card">
+          <div>
+            <strong>${file}</strong>
+            <p>Real dataset available for forecast</p>
+          </div>
+          <button class="btn btn-secondary small" data-file="${file}">Forecast</button>
+        </div>
+      `).join('');
+
+      document.querySelectorAll('[data-file]').forEach(button => {
+        button.addEventListener('click', () => {
+          const fileName = button.dataset.file;
+          loadForecast(fileName);
+        });
+      });
+    }
+
+    async function loadForecast(fileName) {
+      forecastOutput.innerHTML = '<p>Loading forecast for selected dataset...</p>';
+      try {
+        const response = await fetch(`/predict?file_name=${encodeURIComponent(fileName)}`);
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.detail || 'Could not generate forecast');
+        }
+        const data = await response.json();
+        const rows = data.forecast.map(item => `
+          <div class="forecast-row">
+            <span>${item.date}</span>
+            <strong>$${item.forecasted_cash_balance.toLocaleString()}</strong>
+            <span class="range">(${item.lower_bound.toLocaleString()} - ${item.upper_bound.toLocaleString()})</span>
+          </div>
+        `).join('');
+
+        forecastOutput.innerHTML = `
+          <div class="forecast-summary">
+            <span>Source: ${data.source}</span>
+            <span>Periods: ${data.forecast_periods}</span>
+          </div>
+          <div class="forecast-list">${rows}</div>
+        `;
+      } catch (error) {
+        forecastOutput.innerHTML = `<p class="error">${error.message}</p>`;
+      }
+    }
+
+    uploadForm.addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!fileUpload.files.length) {
+        uploadMessage.textContent = 'Please choose a CSV file first.';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', fileUpload.files[0]);
+      uploadMessage.textContent = 'Uploading...';
+
+      const response = await fetch('/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        uploadMessage.textContent = error.detail || 'Upload failed';
+        uploadMessage.classList.add('error');
+        return;
+      }
+
+      const result = await response.json();
+      uploadMessage.textContent = `${result.filename} uploaded successfully.`;
+      uploadMessage.classList.remove('error');
+      fileUpload.value = '';
+      fetchFiles(librarySearch.value);
+    });
+
+    librarySearch.addEventListener('input', () => {
+      fetchFiles(librarySearch.value);
+    });
+
+    refreshFiles.addEventListener('click', () => {
+      fetchFiles(librarySearch.value);
+    });
+
+    fetchFiles();
+  </script>
+</body>
+</html>
