@@ -3,66 +3,147 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BRPAP Forecasting</title>
+  <title>BRPAP Forecasting Studio</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <div class="hero">
-    <div class="hero-content">
-      <p class="eyebrow">Premium AI Forecasting</p>
-      <h1>BRPAP</h1>
-      <p>Upload your financial CSVs, manage your data library, and generate cash flow forecasts that feel like a modern forecasting dashboard.</p>
-      <div class="button-row">
-        <a href="/create-checkout-session" class="btn btn-primary">Subscribe for $49/month</a>
-        <button id="refresh-files" class="btn btn-secondary">Refresh library</button>
-      </div>
+  <header class="top-nav">
+    <div class="brand-block">
+      <div class="brand-logo">BRPAP</div>
+      <span>Forecasting Studio</span>
     </div>
-    <div class="hero-visual">
-      <div class="stats-card">
-        <h2>Live Forecast</h2>
-        <div id="forecast-output" class="forecast-output">
-          <p>Select a file from the library or upload a new CSV to preview forecasts instantly.</p>
+    <div class="nav-actions">
+      <a href="/create-checkout-session" class="btn btn-primary">Start subscription</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Built for modern finance teams</p>
+        <h1>Turn your cash data into confident forecasts.</h1>
+        <p>BRPAP helps founders and operators convert raw CSVs into forward-looking cash plans, risk bands, and a polished data library with one elegant workflow.</p>
+        <div class="button-row">
+          <a href="/create-checkout-session" class="btn btn-primary">Subscribe for $49/month</a>
+          <button id="refresh-files" class="btn btn-secondary">Refresh library</button>
         </div>
       </div>
-    </div>
-  </div>
 
-  <section class="library-section">
-    <div class="library-header">
-      <div>
-        <h2>Data Library</h2>
-        <p>Search files, upload CSVs, and choose the dataset you want to forecast.</p>
+      <aside class="hero-panel">
+        <div class="stats-grid">
+          <article class="stat-card">
+            <span class="stat-label">Library datasets</span>
+            <strong id="dataset-count">…</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Forecast window</span>
+            <strong>6 months</strong>
+          </article>
+          <article class="stat-card">
+            <span class="stat-label">Subscription price</span>
+            <strong>$49 / month</strong>
+          </article>
+        </div>
+
+        <div class="forecast-card">
+          <div class="forecast-card-header">
+            <h2>Live forecast preview</h2>
+            <span>Sample dataset available immediately</span>
+          </div>
+          <div id="forecast-output" class="forecast-output">
+            <p>Select a file from your library or upload a CSV to generate a forecast here.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="library-section">
+      <div class="section-head">
+        <div>
+          <h2>Dataset library</h2>
+          <p>Manage your files, search across datasets, and explore forecasts for every upload.</p>
+        </div>
+        <input id="library-search" type="search" placeholder="Search files" />
       </div>
-      <input id="library-search" type="search" placeholder="Search your files" />
-    </div>
-    <div class="upload-panel">
-      <form id="upload-form">
-        <label for="file-upload">Upload CSV dataset</label>
-        <input id="file-upload" type="file" accept=".csv" />
-        <button type="submit" class="btn btn-primary small">Upload file</button>
-        <span id="upload-message" class="upload-message"></span>
-      </form>
-    </div>
-    <div id="file-list" class="file-list"></div>
-  </section>
 
-  <section class="features">
-    <div class="feature">
-      <h3>Forecast from your data</h3>
-      <p>Upload actual cash balance CSVs and keep every dataset in a searchable library.</p>
-    </div>
-    <div class="feature">
-      <h3>AI-powered modeling</h3>
-      <p>Prophet-driven forecasts help you see next month’s cashflow and risk ranges instantly.</p>
-    </div>
-    <div class="feature">
-      <h3>Customer-ready interface</h3>
-      <p>Use the dashboard yourself or share the demo link with prospective customers.</p>
-    </div>
-  </section>
+      <div class="library-grid">
+        <div class="upload-panel">
+          <form id="upload-form">
+            <label for="file-upload">Upload financial CSV</label>
+            <input id="file-upload" type="file" accept=".csv" />
+            <button type="submit" class="btn btn-primary small">Upload dataset</button>
+            <p id="upload-message" class="upload-message"></p>
+          </form>
+
+          <div class="upload-hints">
+            <p><strong>Tip:</strong> CSV files should contain <code>date</code> and <code>cash_balance</code> columns.</p>
+            <p>Uploads are stored in your secure dataset library and can be forecasted instantly.</p>
+          </div>
+        </div>
+
+        <div class="file-list" id="file-list"></div>
+      </div>
+    </section>
+
+    <section class="insights-section">
+      <div class="section-title">
+        <h2>Why BRPAP matters</h2>
+        <p>Forecasting is only useful when the experience is fast, clear, and actionable. BRPAP delivers that with real data, clean visuals, and a professional flow.</p>
+      </div>
+      <div class="insight-grid">
+        <article class="insight-card">
+          <h3>Fast scenario review</h3>
+          <p>Upload your spreadsheet once and keep using it as an active dataset in the library.</p>
+        </article>
+        <article class="insight-card">
+          <h3>Reliable forecasts</h3>
+          <p>Prophet-powered modeling gives you confidence with lower/upper bounds for cash balance trends.</p>
+        </article>
+        <article class="insight-card">
+          <h3>Professional presentation</h3>
+          <p>Everything is designed for commercial demos and customer-ready conversations.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="timeline-section">
+      <div class="section-title">
+        <h2>How it works</h2>
+        <p>From file upload to future forecast, the BRPAP workflow is built for speed and clarity.</p>
+      </div>
+      <div class="timeline">
+        <div class="timeline-step">
+          <span class="step-number">1</span>
+          <h3>Upload CSV</h3>
+          <p>Add your cash balance history using a simple file upload.</p>
+        </div>
+        <div class="timeline-step">
+          <span class="step-number">2</span>
+          <h3>Browse library</h3>
+          <p>Search datasets, review metadata, and choose the file you want to forecast.</p>
+        </div>
+        <div class="timeline-step">
+          <span class="step-number">3</span>
+          <h3>Generate forecast</h3>
+          <p>See six months of projected cash flow with risk bounds and clear support for decisions.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-panel">
+      <div>
+        <h2>Launch your first prediction today</h2>
+        <p>Start with sample data and switch to your own uploaded files as soon as you’re ready.</p>
+      </div>
+      <a href="/create-checkout-session" class="btn btn-primary">Subscribe for $49/month</a>
+    </section>
+  </main>
 
   <footer>
-    <p>BRPAP • Business forecasting for modern operators</p>
+    <div>
+      <p>BRPAP — financial forecasting for founders and finance teams</p>
+      <p>Upload CSVs, browse your library, and preview forecasts in one polished product.</p>
+    </div>
   </footer>
 
   <script>
@@ -73,12 +154,22 @@
     const librarySearch = document.getElementById('library-search');
     const refreshFiles = document.getElementById('refresh-files');
     const forecastOutput = document.getElementById('forecast-output');
+    const datasetCount = document.getElementById('dataset-count');
+    const defaultFile = 'sample_financial.csv';
+
+    function formatDate(isoValue) {
+      return new Date(isoValue).toLocaleDateString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric'
+      });
+    }
 
     async function fetchFiles(query = '') {
       const searchParam = query ? `?search=${encodeURIComponent(query)}` : '';
       const response = await fetch(`/files${searchParam}`);
       const data = await response.json();
       renderFileList(data.files);
+      datasetCount.textContent = data.files.length;
+      return data.files;
     }
 
     function renderFileList(files) {
@@ -88,13 +179,16 @@
       }
 
       fileList.innerHTML = files.map(file => `
-        <div class="file-card">
-          <div>
-            <strong>${file}</strong>
-            <p>Real dataset available for forecast</p>
+        <article class="file-card">
+          <div class="file-details">
+            <strong>${file.name}</strong>
+            <span>${file.source === 'sample' ? 'Sample dataset' : 'Uploaded file'}</span>
+            <p>${file.size_label} · ${formatDate(file.uploaded_at)}</p>
           </div>
-          <button class="btn btn-secondary small" data-file="${file}">Forecast</button>
-        </div>
+          <div class="file-actions">
+            <button class="btn btn-secondary small" data-file="${file.name}">Forecast</button>
+          </div>
+        </article>
       `).join('');
 
       document.querySelectorAll('[data-file]').forEach(button => {
@@ -103,6 +197,15 @@
           loadForecast(fileName);
         });
       });
+    }
+
+    function createTrendSummary(forecast) {
+      if (!forecast.length) return '';
+      const first = forecast[0].forecasted_cash_balance;
+      const last = forecast[forecast.length - 1].forecasted_cash_balance;
+      const delta = last - first;
+      const direction = delta >= 0 ? 'up' : 'down';
+      return `<div class="trend-summary ${direction}">Projected change over period: <strong>$${delta.toLocaleString()}</strong></div>`;
     }
 
     async function loadForecast(fileName) {
@@ -114,19 +217,29 @@
           throw new Error(error.detail || 'Could not generate forecast');
         }
         const data = await response.json();
-        const rows = data.forecast.map(item => `
-          <div class="forecast-row">
-            <span>${item.date}</span>
-            <strong>$${item.forecasted_cash_balance.toLocaleString()}</strong>
-            <span class="range">(${item.lower_bound.toLocaleString()} - ${item.upper_bound.toLocaleString()})</span>
-          </div>
-        `).join('');
+        const maxValue = Math.max(...data.forecast.map(item => Math.abs(item.forecasted_cash_balance)));
+        const rows = data.forecast.map(item => {
+          const barWidth = maxValue ? Math.max(8, Math.round((Math.abs(item.forecasted_cash_balance) / maxValue) * 100)) : 10;
+          return `
+            <div class="forecast-row">
+              <div>
+                <span class="forecast-date">${item.date}</span>
+                <span class="forecast-meta">${item.lower_bound.toLocaleString()} - ${item.upper_bound.toLocaleString()}</span>
+              </div>
+              <div class="forecast-value">
+                <strong>$${item.forecasted_cash_balance.toLocaleString()}</strong>
+                <span class="trend-bar" style="width: ${barWidth}%"></span>
+              </div>
+            </div>
+          `;
+        }).join('');
 
         forecastOutput.innerHTML = `
-          <div class="forecast-summary">
-            <span>Source: ${data.source}</span>
-            <span>Periods: ${data.forecast_periods}</span>
+          <div class="forecast-summary-row">
+            <span class="summary-pill">Source: ${data.source}</span>
+            <span class="summary-pill">Periods: ${data.forecast_periods}</span>
           </div>
+          ${createTrendSummary(data.forecast)}
           <div class="forecast-list">${rows}</div>
         `;
       } catch (error) {
@@ -138,12 +251,14 @@
       event.preventDefault();
       if (!fileUpload.files.length) {
         uploadMessage.textContent = 'Please choose a CSV file first.';
+        uploadMessage.classList.add('error');
         return;
       }
 
       const formData = new FormData();
       formData.append('file', fileUpload.files[0]);
       uploadMessage.textContent = 'Uploading...';
+      uploadMessage.classList.remove('error');
 
       const response = await fetch('/upload', {
         method: 'POST',
@@ -161,7 +276,8 @@
       uploadMessage.textContent = `${result.filename} uploaded successfully.`;
       uploadMessage.classList.remove('error');
       fileUpload.value = '';
-      fetchFiles(librarySearch.value);
+      renderFileList(result.files);
+      datasetCount.textContent = result.files.length;
     });
 
     librarySearch.addEventListener('input', () => {
@@ -172,7 +288,11 @@
       fetchFiles(librarySearch.value);
     });
 
-    fetchFiles();
+    fetchFiles().then(files => {
+      if (files && files.length) {
+        loadForecast(defaultFile);
+      }
+    });
   </script>
 </body>
 </html>

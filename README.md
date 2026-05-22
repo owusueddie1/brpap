@@ -5,10 +5,11 @@ BRPAP is a FastAPI-based business prediction service that now includes real time
 ## Features
 
 - Real cash balance forecasting from sample financial CSV data using Prophet
-- Upload CSV datasets to a searchable data library
+- Upload CSV datasets to a searchable data library with metadata tracking
+- Professional dashboard UI with forecast preview, dataset cards, and visual insights
 - `GET /files` returns the available dataset library
-- `POST /upload` accepts new CSV datasets for forecasting
-- `/predict` endpoint now supports real named data files
+- `POST /upload` accepts new CSV datasets and saves unique filenames when duplicates occur
+- `/predict` endpoint supports real named data files and returns confidence bounds
 - Stripe checkout integration for a $49/month subscription
 - Deployment-ready with `Procfile`, `Dockerfile`, and `render.yaml`
 

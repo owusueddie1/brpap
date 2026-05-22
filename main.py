@@ -1,8 +1,9 @@
 import os
+from datetime import datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, File, Form
+from fastapi import FastAPI, HTTPException, Query, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -31,6 +32,14 @@ jinja_env = Environment(
 )
 
 
+def human_readable_size(num: int, suffix: str = "B") -> str:
+    for unit in ["", "K", "M", "G", "T"]:
+        if abs(num) < 1024.0:
+            return f"{num:3.1f}{unit}{suffix}"
+        num /= 1024.0
+    return f"{num:.1f}P{suffix}"
+
+
 def list_data_files():
     files = [SAMPLE_DATA_FILE] + sorted(UPLOAD_DIR.glob("*.csv"))
     seen = set()
@@ -38,7 +47,16 @@ def list_data_files():
     for f in files:
         if f.exists() and f.name not in seen:
             seen.add(f.name)
-            unique_files.append(f.name)
+            stat = f.stat()
+            unique_files.append(
+                {
+                    "name": f.name,
+                    "size_bytes": stat.st_size,
+                    "size_label": human_readable_size(stat.st_size),
+                    "uploaded_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "source": "sample" if f == SAMPLE_DATA_FILE else "uploaded",
+                }
+            )
     return unique_files
 
 
@@ -60,11 +78,11 @@ def home(request: Request):
 
 @app.get("/files")
 def files(search: str | None = Query(None, description="Search filenames")):
-    file_names = list_data_files()
+    file_items = list_data_files()
     if search:
         search_lower = search.lower()
-        file_names = [name for name in file_names if search_lower in name.lower()]
-    return JSONResponse({"files": file_names})
+        file_items = [item for item in file_items if search_lower in item["name"].lower()]
+    return JSONResponse({"files": file_items})
 
 
 @app.post("/upload")
@@ -74,10 +92,98 @@ def upload(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Only CSV uploads are allowed")
 
     target = UPLOAD_DIR / filename
+    stem = target.stem
+    suffix = target.suffix
+    counter = 1
+    while target.exists():
+        target = UPLOAD_DIR / f"{stem}_{counter}{suffix}"
+        counter += 1
+
     with target.open("wb") as out_file:
         out_file.write(file.file.read())
 
-    return {"filename": filename, "message": "Upload complete"}
+    return {
+        "filename": target.name,
+        "message": "Upload complete",
+        "files": list_data_files(),
+    }
+
+
+@app.get("/predict")
+def predict(
+    file_name: str = Query(SAMPLE_DATA_FILE.name, description="CSV file name to forecast"),
+    periods: int = Query(6, gt=0, le=24),
+):
+    try:
+        path = resolve_file_path(file_name)
+        forecast = forecast_cash(str(path), periods=periods)
+        return {
+            "source": path.name,
+            "forecast_periods": periods,
+            "forecast": forecast,
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+
+
+@app.get("/create-checkout-session")
+def create_checkout_session(request: Request):
+    if not STRIPE_SECRET_KEY:
+        raise HTTPException(status_code=500, detail="Stripe secret key not configured")
+
+    stripe.api_key = STRIPE_SECRET_KEY
+    domain = DOMAIN_URL.rstrip("/")
+
+    try:
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            mode="subscription",
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": "BRPAP Monthly Forecasting",
+                            "description": "$49/month subscription for AI forecasting and business prediction",
+                        },
+                        "recurring": {"interval": "month"},
+                        "unit_amount": 4900,
+                    },
+                    "quantity": 1,
+                }
+            ],
+            success_url=f"{domain}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"{domain}/cancel",
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Stripe error: {exc}")
+
+    return RedirectResponse(session.url, status_code=303)
+
+
+@app.get("/success", response_class=HTMLResponse)
+def success(request: Request):
+    template = jinja_env.get_template("success.html")
+    return HTMLResponse(template.render(request=request))
+
+
+@app.get("/cancel", response_class=HTMLResponse)
+def cancel(request: Request):
+    template = jinja_env.get_template("cancel.html")
+    return HTMLResponse(template.render(request=request))
+
+
+@app.get("/health")
+def health():
+    return JSONResponse({"status": "ok", "data_files": len(list_data_files())})
+
+
+@app.post("/solution")
+def solution(request: PainPointRequest):
+    solutions = generate_solutions(request.pain_points)
+    return {"solutions": solutions}
 
 
 @app.get("/predict")
